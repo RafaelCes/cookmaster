@@ -29,7 +29,16 @@ const readAllRecipes = async () => {
     .toArray();
 };
 
+const readRecipeById = async (id) => {
+  const recipeCollection = await mongoConnection.getConnection()
+    .then((db) => db.collection('recipes'));
+
+    return recipeCollection
+    .findOne({ _id: ObjectId(id) });
+};
+
 module.exports = {
   creatRecipe,
   readAllRecipes,
+  readRecipeById,
 };

@@ -5,6 +5,7 @@ module.exports = (err, _req, res, _next) => {
     'All fields must be filled': 401,
     'Incorrect username or password': 401,
     'jwt malformed': 401,
+    'recipe not found': 404,
     'Internal server error': 500,
   };
 
