@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { userRoute, loginRoute } = require('./routes');
+const { userRoute, loginRoute, recipeRoute } = require('./routes');
 const { error } = require('./middlewares');
 
 const app = express();
@@ -15,6 +15,7 @@ app.get('/', (request, response) => {
 
 app.use('/users', userRoute);
 app.use('/login', loginRoute);
+app.use('/recipes', recipeRoute);
 
 app.use(error);
 
