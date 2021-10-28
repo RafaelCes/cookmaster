@@ -2,7 +2,7 @@ const joi = require('joi');
 
 const userService = require('../services/userService');
 
-const validateBody = (body) => {
+const validateRequest = (body) => {
   const { error } = joi.object({
     name: joi.string().required(),
     email: joi.string().email().required(),
@@ -13,13 +13,13 @@ const validateBody = (body) => {
 
 const createUser = async (req, res, next) => {
   const { body } = req;
-  const error = validateBody(body);
+  const error = validateRequest(body);
   
-  if (error) return next(error);
+  if (error) return next('Invalid entries. Try again.');
   
   const response = await userService.createUser(body);
 
-  if (response.status) return next(response);
+  if (response.status) return next('Email already registered');
   
   res.status(201).json(response);
 };

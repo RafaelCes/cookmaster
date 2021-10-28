@@ -1,15 +1,13 @@
 module.exports = (err, _req, res, _next) => {
-  if (err.isJoi) {
-    return res.status(400).json({
-       message: 'Invalid entries. Try again.',
-    });
-  }
-  const message = {
-    409: 'Email already registered',
-    500: 'Internal server error',
+  const code = {
+    'Invalid entries. Try again.': 400,
+    'Email already registered': 409,
+    'All fields must be filled': 401,
+    'Incorrect username or password': 401,
+    'Internal server error': 500,
   };
 
-  return res.status(err.status).json({
-    message: message[err.status],
+  return res.status(code[err]).json({
+    message: err,
   });
 };
