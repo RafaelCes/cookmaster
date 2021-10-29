@@ -12,13 +12,14 @@ const validateRequest = (body) => {
 };
 
 const createRecipe = async (req, res, next) => {
-  const { body, user } = req;
+  const { body } = req;
+  const { userId } = req.user;
 
   const error = validateRequest(body);
 
   if (error) return next('Invalid entries. Try again.');
 
-  const response = await recipeService.createRecipe(body, user);
+  const response = await recipeService.createRecipe(body, userId);
 
   res.status(201).json(response);
 };
@@ -39,8 +40,33 @@ const readRecipeById = async (req, res, next) => {
   res.status(200).json(response);
 };
 
+const updateRecipe = async (req, res, next) => {
+  const { id } = req.params;
+  const { body } = req;
+  const { user } = req;
+
+  const response = await recipeService.updateRecipe(id, body, user);
+
+  if (typeof response === 'string') return next(response);
+
+  res.status(200).json(response);
+};
+
+const deleteRecipe = async (req, res, next) => {
+  const { id } = req.params;
+  const { user } = req;
+
+  const response = await recipeService.deleteRecipe(id, user);
+
+  if (typeof response === 'string') return next(response);
+
+  res.status(204).json();
+};
+
 module.exports = {
   createRecipe,
   readAllRecipes,
   readRecipeById,
+  updateRecipe,
+  deleteRecipe,
 };

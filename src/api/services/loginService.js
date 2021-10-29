@@ -8,9 +8,9 @@ const validateLogin = async (req) => {
   const user = await userModel.readUser(req);
 
   if (!user) return null;
-  const { _id: id } = user;
+  const { _id: userId } = user;
   const payload = {
-    id,
+    userId,
     email: user.email,
     role: user.role,
   };

@@ -6,6 +6,8 @@ module.exports = (err, _req, res, _next) => {
     'Incorrect username or password': 401,
     'jwt malformed': 401,
     'recipe not found': 404,
+    'missing auth token': 401,
+    'permission not granted': 403,
     'Internal server error': 500,
   };
 
