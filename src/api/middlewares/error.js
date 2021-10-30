@@ -11,7 +11,7 @@ module.exports = (err, _req, res, _next) => {
     'Internal server error': 500,
   };
 
-  return res.status(code[err]).json({
+  return res.status(code[err] || 500).json({
     message: err,
   });
 };

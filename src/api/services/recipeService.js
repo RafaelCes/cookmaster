@@ -44,10 +44,21 @@ const deleteRecipe = async (id, user) => {
   return recipeModel.deleteRecipe(id);
 };
 
+const uploadImage = async (id, path, user) => {
+  const permission = await checkPermission(id, user);
+
+  if (permission) return permission;
+
+  await recipeModel.uploadImage(id, path);
+  
+  return recipeModel.readRecipeById(id);
+};
+
 module.exports = {
   createRecipe,
   readAllRecipes,
   readRecipeById,
   updateRecipe,
   deleteRecipe,
+  uploadImage,
 };
