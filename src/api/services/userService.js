@@ -11,7 +11,7 @@ const createUser = async (body) => {
 
 const createAdmin = async (body, user) => {
   console.log(user);
-  if(user.role !== 'admin') return 'Only admins can register new admins';
+  if (user.role !== 'admin') return 'Only admins can register new admins';
 
   const itExists = await userModel.checkEmail(body);
   
