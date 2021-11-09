@@ -8,6 +8,7 @@ module.exports = (err, _req, res, _next) => {
     'recipe not found': 404,
     'missing auth token': 401,
     'permission not granted': 403,
+    'Only admins can register new admins': 403,
     'Internal server error': 500,
   };
 

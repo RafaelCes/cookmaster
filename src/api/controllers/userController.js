@@ -19,11 +19,25 @@ const createUser = async (req, res, next) => {
   
   const response = await userService.createUser(body);
 
-  if (response.status) return next('Email already registered');
+  if (typeof response === 'string') return next(response);
+  
+  res.status(201).json(response);
+};
+
+const createAdmin = async (req, res, next) => {
+  const { body, user } = req; 
+  const error = validateRequest(body);
+  
+  if (error) return next('Invalid entries. Try again.');
+  
+  const response = await userService.createAdmin(body, user);
+
+  if (typeof response === 'string') return next(response);
   
   res.status(201).json(response);
 };
 
 module.exports = {
   createUser,
+  createAdmin,
 };

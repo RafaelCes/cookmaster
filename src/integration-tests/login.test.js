@@ -119,7 +119,6 @@ describe('POST /users', function () {
     it('o token retornado é valido', function () {
       const { token } = response.body;
       const payload = jwt.verify(token, jwtSecret);
-      console.log(payload);
       expect(payload).to.be.a('object');
       expect(payload.email).to.equal('teste@email.com');
       expect(payload.role).to.equal('user');
