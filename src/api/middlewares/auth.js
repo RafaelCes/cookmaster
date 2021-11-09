@@ -9,7 +9,6 @@ const jwtSecret = 'cant you appprehend not being bound by anything is the greate
 
   try {
     const payload = jwt.verify(token, jwtSecret);
- 
     req.user = payload;
     return next();
   } catch (err) {

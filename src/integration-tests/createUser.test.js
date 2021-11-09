@@ -19,7 +19,10 @@ describe('POST /users', function () {
     sinon.stub(MongoClient, 'connect').resolves(connectionMock);
   });
 
-  after(() => {
+  after(async () => {
+    await connectionMock.db('Cookmaster')
+      .collection('users')
+      .deleteMany({});
     MongoClient.connect.restore();
   });
 
