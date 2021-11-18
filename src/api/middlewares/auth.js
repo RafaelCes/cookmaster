@@ -4,7 +4,6 @@ const jwtSecret = 'cant you appprehend not being bound by anything is the greate
 
  module.exports = (req, _res, next) => {
   const token = req.headers.authorization;
-
   if (!token) return next('missing auth token');
 
   try {
