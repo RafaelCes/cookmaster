@@ -6,11 +6,10 @@ const createUser = async (body) => {
   if (itExists) {
  return 'Email already registered';
 }
-  return userModel.createUser(body);
+  return userModel.createUser(body, 'user');
 };
 
 const createAdmin = async (body, user) => {
-  console.log(user);
   if (user.role !== 'admin') return 'Only admins can register new admins';
 
   const itExists = await userModel.checkEmail(body);
@@ -18,7 +17,7 @@ const createAdmin = async (body, user) => {
   if (itExists) {
     return 'Email already registered';
   }
-  return userModel.createAdmin(body);
+  return userModel.createUser(body, 'admin');
 };
 
 module.exports = {
