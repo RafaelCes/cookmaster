@@ -14,7 +14,7 @@ chai.use(chaiHttp);
 
 const { expect } = chai;
 
-describe('POST /users', function () {
+describe('POST /login', function () {
   let connectionMock;
 
   before(async () => {
