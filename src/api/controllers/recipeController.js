@@ -41,7 +41,7 @@ const readRecipeById = async (req, res, next) => {
 };
 
 const updateRecipe = async (req, res, next) => {
-  try{
+  try {
     const { id } = req.params;
     const { body } = req;
     const { user } = req;
