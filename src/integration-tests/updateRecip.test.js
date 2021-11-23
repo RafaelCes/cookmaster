@@ -250,7 +250,7 @@ describe('PUT /recipes/:id', function () {
       expect(response.body).to.be.a('object');
     });
     
-    it('retorna u objeto com a receita criada', function () {
+    it('retorna u objeto com a receita atualizada', function () {
       const recipe = response.body;
       expect(recipe).to.be.a('object');
       expect(recipe.name).to.equal('recipe edited');
