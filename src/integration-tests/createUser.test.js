@@ -125,8 +125,7 @@ describe('POST /users', function () {
       expect(user._id).to.exist;
     });
 
-   
-
+  
     it('espera que o ususario esteja no banco de dados"', async function () {
       const user = await connectionMock.db('Cookmaster')
       .collection('users')
