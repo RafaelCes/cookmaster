@@ -6,6 +6,7 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const { getConnection } = require('./connectionMock')
 
 const server = require('../api/app');
+const { response } = require('../api/app');
 
 chai.use(chaiHttp);
 
@@ -25,7 +26,7 @@ const recipeNoPermission = {
   userId: '25f46914677df66035f61a355',
 };
 
-describe('PUT /recipes/:id', function () {
+describe('DELETE /recipes/:id', function () {
   let connectionMock;
   let token;
 
@@ -70,7 +71,7 @@ describe('PUT /recipes/:id', function () {
 
     before(async function () {
       response = await chai.request(server)
-        .put('/recipes/00000000');
+        .delete('/recipes/15f46914677df66035f61a355');
     });
 
     it('Espera o codigo de status 401', function () {
@@ -96,7 +97,7 @@ describe('PUT /recipes/:id', function () {
 
     before(async function () {
       response = await chai.request(server)
-        .put('/recipes/00000000')
+        .delete('/recipes/15f46914677df66035f61a355')
         .set({
           authorization: 'token falso',
         });
@@ -120,72 +121,9 @@ describe('PUT /recipes/:id', function () {
     });
   });
 
-  describe('quando os parametros das requisições estão vazios ou incorretos', () => {
-    let response = {};
-
-    before(async function () {
-      response = await chai.request(server)
-        .put('/recipes/0000')
-        .set({
-          authorization: token,
-        })
-        .send({});
-    });
-
-    it('Espera o codigo de status 400', function () {
-      expect(response).to.have.status(400);
-    });
-    it('retorna um objeto', function () {
-      expect(response.body).to.be.a('object');
-    });
-    
-    it('o objeto possui a propriedade "message"', function () {
-      expect(response.body).to.have.property('message');
-    });
-    
-    it('a propriedade "message" possui o texto "Invalid entries. Try again."',
-    function () {
-      expect(response.body.message)
-      .to.be.equal('Invalid entries. Try again.');
-    });
-  });
-
-  describe('quando a receita não existe no banco de dados', () => {
-    let response = {};
-
-    before(async function () {
-      response = await chai.request(server)
-        .put('/recipes/25f46914677df66035f61a355')
-        .set({
-          authorization: token,
-        })
-        .send({
-          name: 'recipe edited',
-          ingredients: 'ingredients edited',
-          preparation: 'preparation edited',
-        });
-    });
-
-
-    it('Espera o codigo de status 404', function () {
-      expect(response).to.have.status(404);
-    });
-    it('retorna um objeto', function () {
-      expect(response.body).to.be.a('object');
-    });
-    
-    it('o objeto possui a propriedade "message"', function () {
-      expect(response.body).to.have.property('message');
-    });
-    
-    it('a propriedade "message" possui o texto "recipe not found"',
-    function () {
-      expect(response.body.message)
-      .to.be.equal('recipe not found');
-    });
-  });
-
   describe('quando o ussuario não tem permissões para alterar a receita',() => {
+    let response = {};
+    
     before(async function () {
 
       const {insertedId} = await connectionMock.db('Cookmaster')
@@ -193,16 +131,10 @@ describe('PUT /recipes/:id', function () {
       .insertOne(recipeNoPermission);
 
       response = await chai.request(server)
-        .put(`/recipes/${insertedId.toString()}`)
+        .delete(`/recipes/${insertedId.toString()}`)
         .set({
           authorization: token,
-        })
-        .send({
-          name: 'recipe edited',
-          ingredients: 'ingredients edited',
-          preparation: 'preparation edited',
         });
-
     });
 
     it('Espera o codigo de status 403', function () {
@@ -223,7 +155,10 @@ describe('PUT /recipes/:id', function () {
     });
   });
 
-  describe('quando a receita é atualizada com sucesso',() => {
+
+  describe('quando a receita é deletada com sucesso', () => {
+    let response = {};
+
     before(async function () {
 
       const {insertedId} = await connectionMock.db('Cookmaster')
@@ -231,34 +166,17 @@ describe('PUT /recipes/:id', function () {
       .insertOne(recipe);
 
       response = await chai.request(server)
-        .put(`/recipes/${insertedId.toString()}`)
+        .delete(`/recipes/${insertedId.toString()}`)
         .set({
           authorization: token,
-        })
-        .send({
-          name: 'recipe edited',
-          ingredients: 'ingredients edited',
-          preparation: 'preparation edited',
         });
-
+      });
+      it('Espera o codigo de status 204', function () {
+      expect(response).to.have.status(204);
     });
 
-    it('Espera o codigo de status 200', function () {
-      expect(response).to.have.status(200);
-    });
-    it('retorna um objeto', function () {
-      expect(response.body).to.be.a('object');
-    });
-    
-    it('retorna u objeto com a receita atualizada', function () {
-      const recipe = response.body;
-      expect(recipe).to.be.a('object');
-      expect(recipe.name).to.equal('recipe edited');
-      expect(recipe.ingredients).to.equal('ingredients edited');
-      expect(recipe.preparation).to.equal('preparation edited');
-      expect(recipe.userId).to.equal('15f46914677df66035f61a355');
-      expect(recipe._id).to.exist;
+    it('espera que a resposta esteja vazia', function () {
+      expect(response.body).to.be.empty;
     });
   });
-  
 });
