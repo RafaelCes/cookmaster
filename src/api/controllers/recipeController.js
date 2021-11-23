@@ -41,15 +41,24 @@ const readRecipeById = async (req, res, next) => {
 };
 
 const updateRecipe = async (req, res, next) => {
-  const { id } = req.params;
-  const { body } = req;
-  const { user } = req;
+  try{
+    const { id } = req.params;
+    const { body } = req;
+    const { user } = req;
 
-  const response = await recipeService.updateRecipe(id, body, user);
+    const error = validateRequest(body);
 
-  if (typeof response === 'string') return next(response);
+    if (error) return next('Invalid entries. Try again.');
+
+    const response = await recipeService.updateRecipe(id, body, user);
+
+    if (typeof response === 'string') return next(response);
 
   res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 };
 
 const deleteRecipe = async (req, res, next) => {
