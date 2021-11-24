@@ -8,14 +8,16 @@ let testResults;
 
 beforeAll(async () =>{
   try {
-    await exec(`npm run dev:test:coverage:json &> /dev/null`);
-    
+    await exec(`npm run dev:test:coverage:json &> /dev/null`).catch(() => true);
+
+    await new Promise((resolve) => setTimeout(() => resolve(true), 2500))
+
     const path = resolve("coverage", "coverage-summary.json");
-    
+
     const lines = await readFile(path, "utf-8")
       .then((coverageTxt) => JSON.parse(coverageTxt))
       .then(({ total: { lines } }) => lines );
-  
+
     testResults = {
       path,
       lines,
@@ -31,12 +33,12 @@ afterAll(async () => {
 
 describe
   .each([
-    [11,30,50], 
+    [11,30,50],
     [13,60,100],
     [14,90,150]
   ])
   (
-    '%p - Crie testes de integração que cubram no mínimo %p porcento dos arquivos em src com um mínimo de %p linhas cobertas', 
+    '%p - Crie testes de integração que cubram no mínimo %p porcento dos arquivos em src com um mínimo de %p linhas cobertas',
     (_testId, percentage, coveredLines) => {
       it(
         'Será validado que o teste cobre o valor esperado',
