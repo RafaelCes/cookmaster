@@ -73,6 +73,7 @@ const deleteRecipe = async (req, res, next) => {
 };
 
 const uploadImage = async (req, res, next) => {
+  try {
   const { id } = req.params;
   const { path } = req.file;
   const { user } = req;
@@ -82,6 +83,10 @@ const uploadImage = async (req, res, next) => {
   if (typeof response === 'string') return next(response);
 
   res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 };
 
 module.exports = {

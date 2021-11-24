@@ -47,6 +47,8 @@ const deleteRecipe = async (id, user) => {
 };
 
 const uploadImage = async (id, path, user) => {
+  if (!ObjectId.isValid(id)) return 'recipe not found';
+
   const permission = await checkPermission(id, user);
 
   if (permission) return permission;

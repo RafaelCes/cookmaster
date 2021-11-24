@@ -11,10 +11,23 @@ chai.use(chaiHttp);
 
 const { expect } = chai;
 
-describe('POST /users/admin', function () {
+const recipe = {
+  name: 'recipe 1',
+  ingredients: 'ingredients 1',
+  preparation: 'preparation 1',
+  userId: '15f46914677df66035f61a355',
+};
+
+const recipeNoPermission = {
+  name: 'recipe 1',
+  ingredients: 'ingredients 1',
+  preparation: 'preparation 1',
+  userId: '25f46914677df66035f61a355',
+};
+
+describe('PUT /recipes/:id/image', function () {
   let connectionMock;
   let token;
-  let adminToken;
 
   before(async () => {
     connectionMock = await getConnection();
@@ -37,31 +50,17 @@ describe('POST /users/admin', function () {
         password: 'senhateste',
       })
       .then((response) => response.body.token);
-
-      await connectionMock.db('Cookmaster')
-      .collection('users')
-      .insertOne({
-        _id: '15f46914677df66035f61a356',
-        name: 'admin',
-        email: 'admin@email.com',
-        password: 'senhaadmin',
-        role:'admin',
-      });
-
-    adminToken = await chai.request(server)
-      .post('/login')
-      .send({
-        email: 'admin@email.com',
-        password: 'senhaadmin',
-      })
-      .then((response) => response.body.token);
-
   });
 
   after(async () => {
     await connectionMock.db('Cookmaster')
+      .collection('recipes')
+      .deleteMany({});
+
+    await connectionMock.db('Cookmaster')
       .collection('users')
       .deleteMany({});
+      
     MongoClient.connect.restore();
   });
 
@@ -71,7 +70,7 @@ describe('POST /users/admin', function () {
 
     before(async function () {
       response = await chai.request(server)
-        .post('/users/admin');
+        .put('/recipes/00000000/image');
     });
 
     it('Espera o codigo de status 401', function () {
@@ -97,7 +96,7 @@ describe('POST /users/admin', function () {
 
     before(async function () {
       response = await chai.request(server)
-        .post('/users/admin')
+        .put('/recipes/00000000/image')
         .set({
           authorization: 'token falso',
         });
@@ -121,87 +120,24 @@ describe('POST /users/admin', function () {
     });
   });
 
-  describe('quando os parametros das requisições estão vazios ou incorretos', () => {
+  describe('quando o ussuario não tem permissões para alterar a receita',() => {
     let response = {};
 
     before(async function () {
+
+      const {insertedId} = await connectionMock.db('Cookmaster')
+      .collection('recipes')
+      .insertOne(recipeNoPermission);
+
       response = await chai.request(server)
-        .post('/users/admin')
+        .put(`/recipes/${insertedId.toString()}/image`)
         .set({
           authorization: token,
         })
-        .send({});
-    });
+        .attach(
+          'image', 'src/uploads/ratinho.jpeg'
+        );
 
-    it('Espera o codigo de status 400', function () {
-      expect(response).to.have.status(400);
-    });
-    it('retorna um objeto', function () {
-      expect(response.body).to.be.a('object');
-    });
-    
-    it('o objeto possui a propriedade "message"', function () {
-      expect(response.body).to.have.property('message');
-    });
-    
-    it('a propriedade "message" possui o texto "Invalid entries. Try again."',
-    function () {
-      expect(response.body.message)
-      .to.be.equal('Invalid entries. Try again.');
-    });
-  });
-
-  describe('Quando o email enviado já está cadastrado', function () {
-    let response = {};
-
-    before(async function () {
-      response = await chai.request(server)
-        .post('/users/admin')
-        .set({
-          authorization: adminToken,
-        })
-        .send({
-          name: 'teste',
-          email: 'teste@email.com',
-          password: 'senhateste',
-        });
-    });
-    
-
-    it('Espera o codigo de status 409', function () {
-      expect(response).to.have.status(409);
-    });
-    it('retorna um objeto', function () {
-      expect(response.body).to.be.a('object');
-    });
-    
-    it('o objeto possui a propriedade "message"', function () {
-      expect(response.body).to.have.property('message');
-    });
-    
-    it('a propriedade "message" possui o texto "Email already registered"',
-    function () {
-      expect(response.body.message)
-      .to.be.equal('Email already registered');
-    });
-  });
-
-  describe('quando o usuario não é um admin', () => {
-    let response = {};
-
-    before(async function () {
-      
-
-      response = await chai.request(server)
-        .post('/users/admin')
-        .set({
-          authorization: token,
-        })
-        .send({
-          email: 'admin@email.com',
-          password: 'senhaadmin',
-          name: 'teste'
-        });
     });
 
     it('Espera o codigo de status 403', function () {
@@ -215,38 +151,82 @@ describe('POST /users/admin', function () {
       expect(response.body).to.have.property('message');
     });
     
-    it('a propriedade "message" possui o texto "Only admins can register new admins"',
+    it('a propriedade "message" possui o texto "permission not granted"',
     function () {
       expect(response.body.message)
-      .to.be.equal('Only admins can register new admins');
+      .to.be.equal('permission not granted');
     });
   });
 
-  describe('quando o novo admin é criado com sucesso', () => {
+  describe('quando a receita não existe no banco de dados', () => {
     let response = {};
 
     before(async function () {
-      
       response = await chai.request(server)
-        .post('/users/admin')
+        .put('/recipes/25f46914677df66035f61a355/image')
         .set({
-          authorization: adminToken,
+          authorization: token,
         })
-        .send({
-          email: 'testeadmin@email.com',
-          password: 'testesenhaadmin',
-          name: 'testeadmin'
-        });
+        .attach(
+          'image', 'src/uploads/ratinho.jpeg'
+        );
     });
 
-    it('retorna um objeto com o usuario criado', function () {
-      const { user } = response.body;
+
+    it('Espera o codigo de status 404', function () {
+      expect(response).to.have.status(404);
+    });
+    it('retorna um objeto', function () {
       expect(response.body).to.be.a('object');
-      expect(user.name).to.equal('testeadmin');
-      expect(user.email).to.equal('testeadmin@email.com');
-      expect(user.role).to.equal('admin');
-      expect(user.password).to.be.undefined;
-      expect(user._id).to.exist;
+    });
+    
+    it('o objeto possui a propriedade "message"', function () {
+      expect(response.body).to.have.property('message');
+    });
+    
+    it('a propriedade "message" possui o texto "recipe not found"',
+    function () {
+      expect(response.body.message)
+      .to.be.equal('recipe not found');
+    });
+  });
+
+  describe('quando o ussuario não tem permissões para alterar a receita',() => {
+    let response = {};
+
+    before(async function () {
+
+      const {insertedId} = await connectionMock.db('Cookmaster')
+      .collection('recipes')
+      .insertOne(recipe);
+
+      response = await chai.request(server)
+        .put(`/recipes/${insertedId.toString()}/image`)
+        .set({
+          authorization: token,
+        })
+        .attach(
+          'image', 'src/uploads/ratinho.jpeg'
+        );
+
+    });
+
+    it('Espera o codigo de status 200', function () {
+      expect(response).to.have.status(200);
+    });
+    it('retorna um objeto', function () {
+      expect(response.body).to.be.a('object');
+    });
+    
+    it('retorna u objeto com a receita criada', function () {
+      const recipe = response.body;
+      expect(recipe).to.be.a('object');
+      expect(recipe.name).to.equal('recipe 1');
+      expect(recipe.ingredients).to.equal('ingredients 1');
+      expect(recipe.preparation).to.equal('preparation 1');
+      expect(recipe.userId).to.equal('15f46914677df66035f61a355');
+      expect(recipe._id).to.exist;
+      expect(recipe.image).to.exist;
     });
   });
 });
